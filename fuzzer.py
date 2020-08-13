@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python python2.7.18
 import socket
 
 RHOST = "192.168.56.101"  # mind to change :-)
