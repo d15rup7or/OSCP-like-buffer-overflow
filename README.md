@@ -23,16 +23,20 @@ Use the pattern_offset
 ruby pattern_offset.rb -q 39653138
 ```
 
-## Determining Badchars
+## 3. Determining Badchars
 In this particular case, the vulnerable function is *sprintf* (it handles strings). Given the fact that ASCII strings are terminated with a null-byte ("\x00"), we put it at the top of the list.
 The newline character is used by handleConnection() to chunk the messages we send to it. 
 So the starting point for our badchars is "\n" alternatively known as "\x0A"
 
 To be sure that we haven't missed any other we will utilize our python script `badchars.py`.
 
-To identify badchars we can also use `!mona bytearray`
+To identify badchars we can also use `!mona bytearray` as it creates the entire character array from 00 to FF in .bin format for comparison.
 
-## Identifying JMP ESP gadget
+```
+!mona bytearray –cpb "\x00"
+```
+
+## 4. Identifying JMP ESP gadget
 After determining the badchars of the application, we will go straight to identification of the JMP ESP that will be responsible for changing the natural flow of application to run our shellcode (which we will insert into the stack).
 
 In assembly, the OPCODE for JMP ESP is `\xff\xe4`. Using mona we will locate the register in the application that points to this OPCODE. Thanks to that, we can change the flow o the application to run our shellcode, rewriting the stack from its base (EBP).
@@ -45,7 +49,7 @@ Run `!mona jmp -r esp -cpb "\x00\x0A"` to identify which pointers do not have th
 
 At this point we might be in possesion of the correct JMP ESP address. If we want to check, we simply run `!mona find -s "\xff\xe4" -m dostackbufferoverflowgood.exe` directly on the identified vulnerable module.
 
-## Generating shellcode
+## 5. Generating shellcode
 Now it's time to come up with some interesting bytecode to put on the stack. Metasploit has a built-in tool called msfvenom that can produce shellcode for us.
 ```
 msfvenom -p windows/exec --list-options
